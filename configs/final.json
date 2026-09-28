@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "E5-description + USER2-D512; pool1000; CatBoost100; BM25-b025",
+  "encoders": {
+    "e5": {
+      "repo": "intfloat/multilingual-e5-small",
+      "revision": "fd1525a9fd15316a2d503bf26ab031a61d056e98",
+      "weights_sha256": "1a55775f53449dac10a2bcbc312469fac40b96d53198c407081a831f81c98477",
+      "tokenizer_sha256": "0b44a9d7b51c3c62626640cda0e2c2f70fdacdc25bbbd68038369d14ebdf4c39",
+      "local_path": "models/multilingual-e5-small",
+      "item_text_recipe": "passage: title[:200] + '. ' + selected_service_params[:200] + '. ' + description[:300]",
+      "query_text_recipe": "query: search_query[:300] + '. ' + search_infm_params_text[:150]",
+      "item_window": 128,
+      "query_window": 128,
+      "item_batch": 128,
+      "query_batch": 128,
+      "pooling": "attention_mask_mean_then_l2",
+      "math": "FP32_cuda_forward_pooling; float16_storage"
+    },
+    "user2": {
+      "repo": "deepvk/USER2-base",
+      "revision": "94bbff0cc696f26dc93b275fc874657727df0c29",
+      "weights_sha256": "54174e02d3948c546218159cc4940472e9dc0eee8f707aa9915ab632ed12acad",
+      "tokenizer_sha256": "8bdc337bdee65a5fdb697df1ac7453b2ae5c34c105125eac5f68c87827395c4e",
+      "local_path": "models/USER2-base",
+      "item_text_recipe": "search_document: TITLE: cleaned title; newline PARAMETERS: full cleaned raw parameters; newline DESCRIPTION: full cleaned description; HTML/whitespace only",
+      "query_text_recipe": "search_query: search_query[:300] + '. ' + search_infm_params_text[:150]",
+      "item_window": 512,
+      "query_window": 128,
+      "item_batch": 256,
+      "query_batch": 256,
+      "pooling": "attention_mask_mean_fp32_then_l2",
+      "math": "FP16_cuda_autocast; FP32_pooling; float16_storage"
+    }
+  },
+  "pool": {
+    "source_order": ["e5", "user2"],
+    "source_round_robin_dedup": true,
+    "baseline_prefix_limit": 400,
+    "candidate_limit": 1000,
+    "base_channel_depths": {"global": 200, "category": 100, "local": 100, "e5_neighbor": 50},
+    "base_quotas": [100, 50, 50, 200],
+    "e5_geo_boost": 0.2,
+    "user2_geo_boost": 0.5,
+    "category_boost": 0.5,
+    "e5_reserved_neighbors": 5,
+    "neighbor_radius_km": 50.0,
+    "neighbor_max_p90_km": 25.0,
+    "neighbor_min_items": 10,
+    "neighbor_max_locations": 5,
+    "channel_depths": {"global": 1200, "category": 600, "local": 600, "neighbor_e5": 100},
+    "category_zero_fallback": "category=all; local=exact location across all categories",
+    "tail_order": "source geo score descending then item_id; E5/USER2 round-robin"
+  },
+  "bm25": {"k1": 1.2, "b": 0.25},
+  "bm25_recipe": {
+    "fields": ["item_title_raw", "item_infm_params_text", "item_description_raw"],
+    "query": "search_query only",
+    "tokenization": "HTML removal, entity decoding, whitespace collapse, lowercase, ё→е, Unicode alphanumeric sequences without underscore",
+    "idf": "log(1 + (N-df+0.5)/(df+0.5))",
+    "statistics": "entire input item corpus per field; no truncation"
+  },
+  "features": ["e5_cosine", "user2_cosine", "e5_rank", "user2_rank", "e5_present", "user2_present", "query_category_known", "category_match", "location_match", "neighbor_location", "distance_km", "distance_available", "title_word_coverage", "params_word_coverage", "query_word_count", "query_char_length", "title_char_length", "params_char_length", "description_char_length", "rating", "rating_missing", "log_reviews", "reviews_missing", "bm25_title", "bm25_params", "bm25_description"],
+  "catboost": {
+    "path": "models/final_catboost_b025.cbm",
+    "sha256": "14d3a227f904eae8f3af4be032e9eb664a72b4878b617ad5dfb41d80c9e0917b",
+    "iterations": 100,
+    "loss_function": "YetiRank",
+    "depth": 8,
+    "learning_rate": 0.05,
+    "l2_leaf_reg": 3.0,
+    "random_seed": 20260927,
+    "task_type": "GPU"
+  },
+  "cache_dir": null,
+  "reference_csv_sha256": "c016e286bb1b7e099de2661a11c7e2ff2338ac25ccfc0c2af46a9c75ee24014b",
+  "tested_versions": {
+    "python": "3.12.11",
+    "torch": "2.5.1",
+    "transformers": "4.48.3",
+    "catboost": "1.2.10",
+    "numpy": "2.0.1",
+    "pandas": "2.3.2",
+    "scipy": "1.15.3",
+    "pyarrow": "21.0.0",
+    "huggingface-hub": "0.25.2",
+    "safetensors": "0.6.2",
+    "ipython": "8.31.0"
+  }
+}

@@ -1,0 +1,12 @@
+*.py text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.ipynb text eol=lf
+*.txt text eol=lf
+*.csv -text
+*.html text eol=lf
+*.cbm binary
+*.toml text eol=lf
+uv.lock text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf

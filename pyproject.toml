@@ -1,0 +1,20 @@
+[project]
+name = "avito-search-final"
+version = "1.0.0"
+description = "Frozen E5 + USER2-D512 + CatBoost retrieval solution"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "torch==2.5.1",
+  "transformers==4.48.3",
+  "catboost==1.2.10",
+  "numpy==2.0.1",
+  "pandas==2.3.2",
+  "scipy==1.15.3",
+  "pyarrow==21.0.0",
+  "safetensors==0.6.2",
+  "huggingface-hub==0.25.2",
+  "ipython==8.31.0",
+]
+
+[tool.uv]
+package = false
