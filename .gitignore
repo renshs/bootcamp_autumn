@@ -4,6 +4,7 @@ __pycache__/
 .ipynb_checkpoints/
 notebooks/.deps/
 *.zip
+!artifacts/benchmark_item_cache.zip
 models/USER2-base/
 models/USER2-small/
 models/multilingual-e5-small/

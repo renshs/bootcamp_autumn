@@ -10,3 +10,4 @@
 uv.lock text eol=lf
 .gitignore text eol=lf
 .gitattributes text eol=lf
+artifacts/benchmark_item_cache.zip filter=lfs diff=lfs merge=lfs -text

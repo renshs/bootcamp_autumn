@@ -384,7 +384,15 @@ def predict(queries_path, items_path, output_path, config_path, cache_dir=None,
     print(f"queries={len(queries)} items={len(items)}", flush=True)
     if not torch.cuda.is_available(): raise RuntimeError("Для закреплённого CUDA inference требуется GPU")
     device = "cuda"
+    # A normal Git LFS checkout materializes this optional archive in the repo.
+    # Explicit CLI options still take precedence; a missing LFS object is harmless.
+    bundled_archive = _local_path("artifacts/benchmark_item_cache.zip")
+    if (not cache_archive and not cache_public_url and bundled_archive.is_file()
+            and bundled_archive.stat().st_size > 1024):
+        cache_archive = bundled_archive
     cache = Path(cache_dir) if cache_dir else (_local_path(cfg["cache_dir"]) if cfg.get("cache_dir") else None)
+    if cache is None and cache_archive == bundled_archive:
+        cache = _local_path("cache/benchmark")
     if (cache_archive or cache_public_url) and cache is None:
         raise ValueError("Для загрузки benchmark-кеша укажите --cache-dir")
     model = CatBoostRanker(); model.load_model(str(model_path))
