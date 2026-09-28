@@ -364,7 +364,8 @@ def _features(q, pool, sources, qvectors, ivectors, items, itemcols, geo, index,
     return frame
 
 
-def predict(queries_path, items_path, output_path, config_path, cache_dir=None):
+def predict(queries_path, items_path, output_path, config_path, cache_dir=None,
+            cache_archive=None, cache_public_url=None, cache_public_path=None):
     """Run frozen inference on new Parquet files; return output Path."""
     # ModernBERT's compile decorators trigger a broken Inductor import on the pinned host.
     import torch
@@ -384,6 +385,8 @@ def predict(queries_path, items_path, output_path, config_path, cache_dir=None):
     if not torch.cuda.is_available(): raise RuntimeError("Для закреплённого CUDA inference требуется GPU")
     device = "cuda"
     cache = Path(cache_dir) if cache_dir else (_local_path(cfg["cache_dir"]) if cfg.get("cache_dir") else None)
+    if (cache_archive or cache_public_url) and cache is None:
+        raise ValueError("Для загрузки benchmark-кеша укажите --cache-dir")
     model = CatBoostRanker(); model.load_model(str(model_path))
     if model.tree_count_ != 100 or list(model.feature_names_) != FEATURES:
         raise ValueError("CatBoost: неверные число деревьев или порядок признаков")
@@ -391,6 +394,20 @@ def predict(queries_path, items_path, output_path, config_path, cache_dir=None):
         output = pd.DataFrame({"query_id": queries.query_id, "answer": [""] * len(queries)})
         output_path = Path(output_path); output_path.parent.mkdir(parents=True, exist_ok=True)
         output.to_csv(output_path, index=False); return output_path
+    if cache is not None:
+        from solution.benchmark_cache import prepare_cache
+        spec_path = _local_path("configs/benchmark_cache.json")
+        spec = json.loads(spec_path.read_text(encoding="utf-8"))
+        same_catalog = (len(items) == spec["catalog_items"] and
+                        _digest(items.item_id) == spec["ordered_item_ids_sha256"])
+        if (cache_archive or cache_public_url) and not same_catalog:
+            print("Benchmark cache belongs to another item catalog; recomputing embeddings", flush=True)
+        else:
+            status = prepare_cache(cache, spec_path,
+                archive=Path(cache_archive) if cache_archive else None,
+                public_url=cache_public_url, public_path=cache_public_path)
+            if status == "missing":
+                print("Item cache is absent; computing embeddings", flush=True)
     start = time.perf_counter()
     qvectors, ivectors = {}, {}
     for kind in ("e5", "user2"):
@@ -467,8 +484,14 @@ def main():
     p.add_argument("--queries", required=True); p.add_argument("--items", required=True)
     p.add_argument("--output", required=True); p.add_argument("--config", default="configs/final.json")
     p.add_argument("--cache-dir", default=None, help="optional verified item-vector cache")
+    p.add_argument("--cache-archive", default=None, help="local verified benchmark cache ZIP")
+    p.add_argument("--cache-public-url", default=None,
+                   help="optional public Yandex Disk folder or file link for benchmark cache")
+    p.add_argument("--cache-public-path", default=None,
+                   help="path inside public folder; empty string means direct file link")
     a = p.parse_args()
-    print(predict(a.queries, a.items, a.output, a.config, a.cache_dir))
+    print(predict(a.queries, a.items, a.output, a.config, a.cache_dir,
+                  a.cache_archive, a.cache_public_url, a.cache_public_path))
 
 
 if __name__ == "__main__": main()

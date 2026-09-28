@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "archive_name": "benchmark_item_cache.zip",
+  "archive_sha256": "c8fff2b1264347a8d73f417a1c19c75d81f3628b79693b85a688556f25f02bd3",
+  "archive_bytes": 435946776,
+  "ordered_item_ids_sha256": "b8c8cbfa1e333a04057c9f8775d74616173801e4d5cabdc19858a01dbc2cc288",
+  "files": {
+    "e5_items.npy": "618c1a8bd70dd6138faca841a31b8d3241e4b73c0ecd85b9359d70032fc00029",
+    "e5_items.json": "ae2e1b80a8af7046b8bc395c12e4573f53259eeec5cd065997eb8483e7703c6f",
+    "user2_items.npy": "1473df5f4368928c36edb3519d1c84d76f79734b4971a223146ab0bdc42b6873",
+    "user2_items.json": "bdc24e61f1b947c5873ca4429042ef0d0f8ee19d44073909a20434b23b33003d"
+  },
+  "catalog_items": 189212,
+  "note": "Optional cache for the original benchmark_items.parquet order and final text recipes. Inference verifies its manifests against the actual input corpus."
+}
