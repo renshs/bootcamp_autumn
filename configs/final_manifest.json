@@ -6,7 +6,7 @@
     "configs/benchmark_cache.json": "75e2990b1eb2454ac85e3826dbf517e706a9e54587b3c801a9bd34808c1b79be",
     "configs/final.json": "7c53825ff5a96059212654540bfa9cc7eaf549f23e9cf4f9a757cd79302232eb",
     "models/final_catboost_b025.cbm": "14d3a227f904eae8f3af4be032e9eb664a72b4878b617ad5dfb41d80c9e0917b",
-    "notebooks/reproduce_solution.ipynb": "f3ea3c3f2356bba459949b176fe8c8de6b95fb84a7c5e58b4f7745d152388587",
+    "notebooks/reproduce_solution.ipynb": "30f7c9a148a9db89dd71fc99c09b6f84dc7d22c8c35f9930111af0a5e9424e05",
     "pyproject.toml": "c824b8984cb71c1c4055ac722ccf2d61ea11cf1799f10e943e23b409950c1a62",
     "README.md": "175782c5a7b45df9a92daa073e3a158caa9a32590b3a9f39ad827ad7fd6609cc",
     "requirements-final.txt": "490a52504d5d0176db4cd1c23b02e3d0d5e0de13015e2dd7307956c45aade759",
